@@ -9,4 +9,7 @@
 - can配置（选择回环模式，开启接收中断）
 ![can1](https://github.com/user-attachments/assets/326e59bb-ccaa-49f1-841c-1683150f1a9d)
 ![can2](https://github.com/user-attachments/assets/2e80417d-d90e-4b1f-9c34-62754ff79c6b)
-
+ ## API
+ - HAL_CAN_Start(CAN_HandleTypeDef *hcan);//开启can控制器，CAN 控制器会开始监听hcan总线
+ - __HAL_CAN_ENABLE_IT(CAN_HandleTypeDef *hcan,CAN_IT_RX_FIFO1_MSG_PENDING);使能hcan这个can控制器的FIFO1消息挂起中断，当有数据发送到FIFO1时，就会调用HAL_CAN_RxFifo1MsgPendingCallback这个回调函数（注意：只需使能一次就行）
+ - 
