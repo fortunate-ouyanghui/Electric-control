@@ -43,7 +43,7 @@ HAL_CAN_AddTxMessage(&hcan,&header,data,&usedMailbox);
 HAL_StatusTypeDef HAL_CAN_ConfigFilter(CAN_HandleTypeDef *hcan, const CAN_FilterTypeDef *sFilterConfig);
 示例：假设发送端发来数据端的ID为：0x001 0001 01xx,我想接收0x001 0001 01xx，则需要设置ID：0x114,标准帧，数据帧，选择过滤器13（CAN1有编号为0-13个过滤器，CAN2有编号为14-27个过滤器），FIFO1
 1. 计算掩码：因为ID：0x114=0x001 0001 0100 所以：Mask:0x111 1111 1100=0x7FC
-2. 组合32位过滤器值：
+2. 组合32位过滤器值：(前提是配置的是32位的过滤器，如果过是16位的过滤器：则ID<<5)
 标准帧（11位）寄存器映射：
 位阈：             31-21     20     19     18-0
 标准帧（32位）：    11位ID    RTR    IDE    未使用
