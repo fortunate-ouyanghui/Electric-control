@@ -41,7 +41,7 @@ HAL_CAN_AddTxMessage(&hcan,&header,data,&usedMailbox);
 - 配置滤波器
 ```C
 HAL_StatusTypeDef HAL_CAN_ConfigFilter(CAN_HandleTypeDef *hcan, const CAN_FilterTypeDef *sFilterConfig);
-示例：假设ID：0x114,标准帧，数据帧，选择过滤器13（CAN1有编号为0-13个过滤器，CAN2有编号为14-27个过滤器），FIFO1
+示例：假设发送端发来数据端的ID为：0x001 0001 01xx,我想接收0x001 0001 01xx，则需要设置ID：0x114,标准帧，数据帧，选择过滤器13（CAN1有编号为0-13个过滤器，CAN2有编号为14-27个过滤器），FIFO1
 1. 计算掩码：因为ID：0x114=0x001 0001 0100 所以：Mask:0x111 1111 1100=0x7FC
 2. 组合32位过滤器值：
 标准帧（11位）寄存器映射：
