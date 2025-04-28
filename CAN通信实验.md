@@ -6,7 +6,7 @@
 ![rcc](https://github.com/user-attachments/assets/38eec99d-61cb-431f-aaa1-21619fa352e0)
 - 时钟树配置
 ![clk](https://github.com/user-attachments/assets/226d841f-60d0-4ed3-8edf-98cf1eeec4ca)
-- can配置（选择回环模式，开启接收中断）
+- can配置（选择回环模式，开启接收中断）（can通信中时间片一定要设置正确）
 ![can1](https://github.com/user-attachments/assets/326e59bb-ccaa-49f1-841c-1683150f1a9d)
 ![can2](https://github.com/user-attachments/assets/2e80417d-d90e-4b1f-9c34-62754ff79c6b)
  ## API
@@ -31,7 +31,7 @@ CAN_TxHeaderTypeDef header;
 uint32_t usedMailbox;
 uint8_t data[1];
 uint16_t length=1;
-header.StdId=ID;//设置标准ID(这里的ID指的是经过滤后期望的目标值，如：期望接收数据为：0x001 0001 11xx,则ID：0x001 0001 1100)
+header.StdId=ID;//设置发送端的ID
 header.ExtId=0;//用来存放扩展的ID，扩展帧ID长度要大于标准帧ID长度
 header.IDE=0；//表示不是扩展帧，是标准帧
 header.RTR=0;//不是遥控帧
@@ -41,7 +41,7 @@ HAL_CAN_AddTxMessage(&hcan,&header,data,&usedMailbox);
 - 配置滤波器
 ```C
 HAL_StatusTypeDef HAL_CAN_ConfigFilter(CAN_HandleTypeDef *hcan, const CAN_FilterTypeDef *sFilterConfig);
-示例：假设发送端发来数据端的ID为：0x001 0001 01xx,我想接收0x001 0001 01xx，则需要设置ID：0x114,标准帧，数据帧，选择过滤器13（CAN1有编号为0-13个过滤器，CAN2有编号为14-27个过滤器），FIFO1
+示例：（(这里的ID指的是经过滤后期望的目标值，如：期望接收数据为：0x001 0001 11xx,则ID：0x001 0001 1100)）假设发送端发来数据端的ID为：0x001 0001 01xx,我想接收0x001 0001 01xx，则需要设置ID：0x001 0001 0100,标准帧，数据帧，选择过滤器13（CAN1有编号为0-13个过滤器，CAN2有编号为14-27个过滤器），FIFO1
 1. 计算掩码：因为ID：0x114=0x001 0001 0100 所以：Mask:0x111 1111 1100=0x7FC
 2. 组合32位过滤器值：(前提是配置的是32位的过滤器，如果过是16位的过滤器：则ID<<5)
 标准帧（11位）寄存器映射：
