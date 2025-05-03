@@ -1,4 +1,4 @@
-## 使用CAN通信实现DS0和DS1流水灯现象（can发送数据data，can同时接收data对其进行解析来控制led）
+## 使用CAN通信实现DS0和DS1流水灯现象（can发送ID为0x001的数据data，配置过滤器分别为0x001和0x008，现象：配置过滤器ID为0x001的报文会进行led处理，配置过滤器为0x008的报文不会进行led处理（自动处理，无需软件处理））
 ## cubemax配置
 - SYS配置
 ![sys](https://github.com/user-attachments/assets/4d1ed2f9-5515-4fba-90ba-a8e1045eaff6)
@@ -39,7 +39,7 @@ void CAN_Send(uint8_t data)
 {
 	uint32_t usedMailbox;
 	CAN_TxHeaderTypeDef Header;
-	Header.StdId=0x001;//标准帧率ID
+	Header.StdId=0x001;//标准帧ID
 	Header.ExtId=0;//用来存放扩展的ID，扩展帧ID长度要大于标准帧ID长度
 	Header.IDE=0;//表示不是扩展帧，是标准帧
 	Header.DLC=1;//表示Data有多少个字节
@@ -47,9 +47,11 @@ void CAN_Send(uint8_t data)
 	HAL_CAN_AddTxMessage(&hcan1,&Header, &data,&usedMailbox);
 }
 ```
-- 配置滤波器
+- 配置滤波器 HAL_StatusTypeDef HAL_CAN_ConfigFilter(CAN_HandleTypeDef *hcan, const CAN_FilterTypeDef *sFilterConfig);
+注意：32位过滤器掩码模式只能过滤出一组ID。16位过滤器可以过滤出2组ID
+1. 使用掩码模式32位过滤器
+![mask2](https://github.com/user-attachments/assets/43dc2207-b1be-4b80-8f9e-36481372f033)
 ```C
-HAL_StatusTypeDef HAL_CAN_ConfigFilter(CAN_HandleTypeDef *hcan, const CAN_FilterTypeDef *sFilterConfig);
 示例：过滤出报文ID为：0x008的报文
 
 //过滤出我想要的ID：0x008;
@@ -60,10 +62,32 @@ void filter()
 	Filter.FilterMode=CAN_FILTERMODE_IDMASK;//使用掩码模式
 	Filter.FilterScale=CAN_FILTERSCALE_32BIT;//32位滤波器
 	Filter.FilterFIFOAssignment=CAN_FILTER_FIFO1;//使用FIFO1
-	Filter.FilterIdHigh=(0x008<<5);//高16位ID，配置想要过滤出的ID
-	Filter.FilterIdLow=0;//低16位ID
-	Filter.FilterMaskIdHigh=(0x7FF<<5);//高16位掩码
-	Filter.FilterMaskIdLow=0;//低16位掩码
+	Filter.FilterIdHigh=(0x008<<21)>>16;//左移21位表示stdID（放在高11位）,然后将结果的高 16 位赋值给 FilterIdHigh
+	Filter.FilterIdLow=0;//低16位ID（扩展帧）
+	Filter.FilterMaskIdHigh=(0x7FF<<21)>>16;//左移21位表示过滤出stdID，然后将结果的高16位赋值给FilterMaskIdHigh
+	Filter.FilterMaskIdLow=0;//低16位掩码（用于扩展帧）
+	Filter.FilterActivation=ENABLE;//使能过滤器
+	
+	HAL_CAN_ConfigFilter(&hcan1,&Filter);
+}
+```
+2. 使用16位的过滤器掩码模式
+![mask1](https://github.com/user-attachments/assets/2ef1effc-298d-4e3b-a150-fc8c64328e9e)
+```C
+//过滤出我想要的ID：0x008和0x001
+void filter()
+{
+	CAN_FilterTypeDef Filter;
+	Filter.FilterBank=13;//使用过滤器13（can1有0-13个过滤器，can2有14-27个过滤器）
+	Filter.FilterMode=CAN_FILTERMODE_IDMASK;//使用掩码模式
+	Filter.FilterScale=CAN_FILTERSCALE_16BIT;//16位滤波器
+	Filter.FilterFIFOAssignment=CAN_FILTER_FIFO1;//使用FIFO1
+	
+	Filter.FilterIdHigh=(0x008<<5);//配置第一个ID
+	Filter.FilterMaskIdHigh=(0x7FF<<5);//配置第一个ID的掩码
+	
+	Filter.FilterIdLow=0x001<<5;//配置第二个ID
+	Filter.FilterMaskIdLow=0x7FF<<5;//配置第二个ID的掩码
 	Filter.FilterActivation=ENABLE;//使能过滤器
 	
 	HAL_CAN_ConfigFilter(&hcan1,&Filter);
@@ -71,7 +95,7 @@ void filter()
 ```
 - 回调函数
 ```C
-void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)//开启CAN控制器的FIFOx消息挂起中断后，收到消息就会进入这个函数
+void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan)//开启CAN控制器的FIFOx消息挂起中断后，经过率后收到消息就会进入这个函数
 {
   CAN_RxHeaderTypeDef header;
   uint8_t data;
