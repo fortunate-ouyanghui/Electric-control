@@ -20,3 +20,12 @@ Ki的作用：用于追求更精确的控制
 Kd*(error_now-error_last)即：Kd*（两次误差之差）
 Kd作用：抑制过冲现象
 ```
+## 积分限幅
+```C
+当积分项（误差累加和）超过上限时，强制其等于上限；低于下限时，强制其等于下限
+即：下限=<error0+error1+error2+error3+...+errori<=上限
+```
+## 积分分离
+```C
+当 |error|> 常数C，不会参与（error0+error1+error2+...+errori）的计算
+```
