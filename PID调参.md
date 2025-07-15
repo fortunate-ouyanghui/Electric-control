@@ -34,6 +34,7 @@ Kd作用：抑制过冲现象
 ## 微分先行
 - nowi-nowi-1表示：这次实际值与上次实际值之差
 <img width="554" height="251" alt="微分先行" src="https://github.com/user-attachments/assets/6edcd135-cf16-4296-82b3-f051a27efc72" />
+
 ## 输出限幅
 ```C
 |error*Kp+Ki*误差的累加值+Kd*（两次误差之差）|<=常数C
