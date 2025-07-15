@@ -29,3 +29,8 @@ Kd作用：抑制过冲现象
 ```C
 当 |error|> 常数C，不会参与（error0+error1+error2+...+errori）的计算
 ```
+## 变速积分
+![变速积分](https://github.com/user-attachments/assets/4d9d1132-abeb-49f3-9e8c-afa818a44c73)
+## 微分先行
+- nowi-nowi-1表示：这次实际值与上次实际值之差
+<img width="554" height="251" alt="微分先行" src="https://github.com/user-attachments/assets/6edcd135-cf16-4296-82b3-f051a27efc72" />
